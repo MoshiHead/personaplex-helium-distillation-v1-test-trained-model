@@ -154,6 +154,14 @@ class ServerState:
             requested_voice_prompt_path = None
             if voice_prompt_filename is not None:
                 requested_voice_prompt_path = os.path.join(self.voice_prompt_dir, voice_prompt_filename)
+                # The prebuilt web UI only offers teacher embedding caches ("NATF2.pt", ...),
+                # which the student cannot use (see the `.pt` guard below). For a non-teacher
+                # model, serve a same-named raw-audio prompt ("NATF2.wav") from the voice
+                # prompt directory instead, if one exists.
+                if self.model_kind != "teacher" and voice_prompt_filename.endswith(".pt"):
+                    wav_path = os.path.splitext(requested_voice_prompt_path)[0] + ".wav"
+                    if os.path.exists(wav_path):
+                        requested_voice_prompt_path = wav_path
             # If the voice prompt file does not exist, find a valid (s0) voiceprompt file in the directory
             if requested_voice_prompt_path is None or not os.path.exists(requested_voice_prompt_path):
                 raise FileNotFoundError(
