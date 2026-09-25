@@ -258,7 +258,7 @@ def train(
 
     selected_teacher_layers: list[int]
     if resume and checkpoint_path.exists():
-        payload = torch.load(checkpoint_path, map_location="cpu")
+        payload = torch.load(checkpoint_path, map_location="cpu", weights_only=False)  # see checkpoint.load
         selected_teacher_layers = payload["selected_teacher_layers"]
         start_step = payload["step"]
     else:

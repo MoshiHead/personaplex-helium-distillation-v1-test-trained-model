@@ -81,7 +81,9 @@ def load(
     optimizer: tp.Optional[torch.optim.Optimizer] = None,
     map_location: str = "cpu",
 ) -> dict:
-    payload = torch.load(path, map_location=map_location)
+    # weights_only=False: the payload holds numpy/Python RNG state alongside the tensors, which
+    # torch>=2.6's default weights_only=True refuses to unpickle. These are our own checkpoints.
+    payload = torch.load(path, map_location=map_location, weights_only=False)
     assert payload["student_config_name"] == student.student_config.name, (
         f"Checkpoint was trained with config {payload['student_config_name']!r}, "
         f"but model was built with {student.student_config.name!r}."
